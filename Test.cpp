@@ -4,7 +4,8 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-    char[][] grid = {{'x','x','x'},{'x','x','x'},{'x','x','x'}};
+    char[3][3] grid;
+    grid = {{'x','x','x'},{'x','x','x'},{'x','x','x'}};
     int[][] neighbors = new int[3][3];
 
     for (int i = 0; i < 3; i++)
@@ -18,7 +19,7 @@ int main(int argc, char **argv)
     cout << neighbors << endl;
     return 0;
 };
-static int classic(char[][] grid, int i, int j)
+static int classic(char[][3] grid, int i, int j)
 {
     int neighbors = 0;
     if ((i>0 && j>0) && grid[i-1][j-1]=='x')
