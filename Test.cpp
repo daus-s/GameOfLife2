@@ -6,7 +6,7 @@ int main(int argc, char **argv)
 {
     char[3][3] grid;
     grid = {{'x','x','x'},{'x','x','x'},{'x','x','x'}};
-    int[][] neighbors = new int[3][3];
+    int** neighbors = new int[3][3];
 
     for (int i = 0; i < 3; i++)
     {
@@ -19,8 +19,11 @@ int main(int argc, char **argv)
     cout << neighbors << endl;
     return 0;
 };
-static int classic(char[][3] grid, int i, int j)
+static int classic(char** myGrid, int y, int x)
 {
+    char** grid = myGrid;
+    int i = y;
+    int j = x;
     int neighbors = 0;
     if ((i>0 && j>0) && grid[i-1][j-1]=='x')
     {
@@ -30,7 +33,7 @@ static int classic(char[][3] grid, int i, int j)
     {
         neighbors++;
     }
-    if ((i>0 && j<grid[i-1].size()-1) && grid[i-1][j+1]=='x')
+    if ((i>0 && j<grid[i-1]->size()-1) && grid[i-1][j+1]=='x')
     {
         neighbors++;
     }
@@ -38,11 +41,11 @@ static int classic(char[][3] grid, int i, int j)
     {
         neighbors++;
     }
-    if (j<grid.size() && grid[i][j+1]=='x')
+    if (j<grid->size()-1 && grid[i][j+1]=='x')
     {
         neighbors++;
     }
-    if ((i<grid.size()-1&&j>0) && grid[i+1][j-1]=='x')
+    if ((i<grid->size()-1&&j>0) && grid[i+1][j-1]=='x')
     {
         neighbors++;
     }
@@ -50,7 +53,7 @@ static int classic(char[][3] grid, int i, int j)
     {
         neighbors++;
     }
-    if ((i<grid.size()&&j<grid.size()) && grid[i+1][j+1]=='x')
+    if ((i<grid->size()-1&&j<grid[i]->size()-1) && grid[i+1][j+1]=='x')
     {
         neighbors++;
     }
