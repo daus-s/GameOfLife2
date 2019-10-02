@@ -26,6 +26,7 @@ class Grid
         //utilities; like print set
         void printGrid();
         void set(int i, int j, char c);
+        void setMode(int m);
 
         //function functions, to edit/ update to change grid display
         int determineGrowth(int i, int j);
@@ -35,8 +36,8 @@ class Grid
 
         //constructors & destructors
         Grid();
-        Grid(int row, int col, char** array);
-        Grid(int x, int y, float density);
+        Grid(int row, int col, char** array, int m);
+        Grid(int x, int y, float density, int m);
         ~Grid();
 
         //booleans

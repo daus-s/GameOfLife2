@@ -4,7 +4,7 @@
 char** myGrid;
 char** nextGen;
 
-int mode = 0;
+int mode;
 
 int row;
 int col;
@@ -12,21 +12,26 @@ int col;
 float density = 0.0f;
 
 //generates random grid based off parameters passed in by user
-Grid::Grid(int x, int y, float density)
+Grid::Grid(int x, int y, float density, int m)
 {
     col = x;
     row = y;
     this->density = density;
+    mode = m;
     cout << x << "," << y << "," << density << endl;
 
-    char** myGrid = new char*[y];
+
+    myGrid = new char*[y];
     for (size_t t = 0; t < y; t++)
     {
         myGrid[t] = new char[x];
     }
-    printGrid();
-    cout << "entering randomGrid()" << endl;
+    //cout << "entering randomGrid()" << endl;
     randomGrid(y, x, density);
+    //cout << "do i make it here?" << endl;
+    //return;
+    cout << mode << endl;
+
 }
 //default to 2 for x,y
 Grid::Grid()
@@ -34,18 +39,34 @@ Grid::Grid()
     col = 2;
     row = 2;
 
-    char** myGrid = new char*[2];
+    myGrid = new char*[2];
     for (size_t t = 0; t < 2; t++)
     {
         myGrid[t] = new char[2];
     }
 }
 //uses pointer for grid location
-Grid::Grid(int x, int y, char** grid)
+Grid::Grid(int x, int y, char** grid, int m)
 {
     col = x;
     row = y;
-    myGrid = grid;
+    myGrid = new char*[y];
+    for (size_t t = 0; t < y; t++)
+    {
+        myGrid[t] = new char[x];
+    }
+
+
+    for (int i = 0; i < row; ++i)
+    {
+        for (int j = 0; j < col; ++j)
+        {
+            myGrid[i][j]=grid[i][j];
+        }
+    }
+    //printGrid();
+
+    mode = m;
 }
 Grid::~Grid()
 {
@@ -54,10 +75,10 @@ Grid::~Grid()
 }
 
 
-
+//populates grid using density and dimension inputs from constructor
 void Grid::randomGrid(int row, int col, float density)
 {
-
+    srand(time(0));
     int number = (float)(row*col)*density;
     //cout << number << endl;
     int dashes = (row * col) - number;
@@ -66,7 +87,7 @@ void Grid::randomGrid(int row, int col, float density)
     {
         for (size_t j = 0 ; j < col; ++j)
         {
-            if ((float)rand()/RAND_MAX <= density)
+            if ((float)rand()/RAND_MAX <= density) //float value from rand/
             {
                 if (number > 0)
                 {
@@ -92,12 +113,11 @@ void Grid::randomGrid(int row, int col, float density)
                     number--;
                 }
             }
-            cout << myGrid[i][j];
         }
-        cout << endl;
     }
     //debug line
-    //printGrid(row, col, randomGrid);
+    printGrid(); //we get to here
+    return;
 }
 
 void Grid::printGrid()
@@ -140,13 +160,17 @@ int Grid::determineGrowth(int i, int j)
         return -1;
 }
 
+//fills in the 'nextGen' 2d array
 void Grid::populateNextGen()
 {
     //good hint in the assignemnt sheet, 'shadow paging'
-    for (int i = 0; i < row;++i)
+    //cout << "locating segfault just inside populateNextGen" << endl;
+    printGrid();
+    for (int i = 0; i < row; ++i)
     {
         for (int j = 0; j < col; ++j)
         {
+            cout << "locating segfault, outside of determineGrowth" << endl;
             int growth = determineGrowth(i,j);
             if(growth == -1)
                 nextGen[i][j]='-';//- is dead right?
@@ -374,4 +398,8 @@ bool Grid::isConstant()
             if (myGrid[i][j]!=nextGen[i][j])
                 return false;
     return true;
+}
+void setMode(int m)
+{
+    mode = m;
 }

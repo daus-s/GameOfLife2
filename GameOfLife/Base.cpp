@@ -15,6 +15,22 @@
 
 using namespace std;
 
+int modeSetting()
+{
+    cout << "enter mode: (c)lassic, (d)onut, (m)irror" << endl;
+    string c = "";
+    cin >> c;
+    //cout << "conditionals:" << (c=="c") << " " << (c=="d") << " " << (c=="d") << endl;
+    if (c=="c")
+        return 1;
+    if (c=="d")
+        return 2;
+    if (c=="m")
+        return 3;
+    else return modeSetting();
+}
+
+//takes in input to determine how the program will proceed, at what rate
 char userPauseSetting()
 {
     cout << "do you want a slight (p)ause between generations, (w)ait for it to provide user input or to run (u)nintrrupted?" << endl;
@@ -23,29 +39,31 @@ char userPauseSetting()
     if (c=="p"||c=="w"||c=="u")
       return c[0];
     else return userPauseSetting();
-
 }
-bool checkCharacters(Grid original)
+
+
+//checks too see if all chars are living or dead cells
+bool checkCharacters(Grid* original)
 {
-    for (int i = 0; i < original.row;++i)
+    for (int i = 0; i < original->row;++i)
     {
-        for (int j = 0; j < original.col; ++j)
+        for (int j = 0; j < original->col; ++j)
         {
-            if (original.myGrid[i][j] !='x' || original.myGrid[i][j] != '-')
+            if (original->myGrid[i][j] !='X' && original->myGrid[i][j] != '-')
                 return false;
         }
     }
     return true;
 }
 
-void toUpperCase(Grid original)
+void toUpperCase(Grid* original)
 {
-    for (int i = 0; i < original.row;++i)
+    for (int i = 0; i < original->row;++i)
     {
-        for (int j = 0; j < original.col; ++j)
+        for (int j = 0; j < original->col; ++j)
         {
-            if (original.myGrid[i][j] == 'x')
-                original.myGrid[i][j]='X';
+            if (original->myGrid[i][j] == 'x')
+                original->myGrid[i][j]='X';
         }
     }
 }
@@ -53,7 +71,7 @@ void toUpperCase(Grid original)
 
 
 
-void parse(Grid grid)
+void parse(Grid* grid)
 {
     cout << "do you wish to enter a map file? (y/n)" << endl;
     char mapFile = 'X';
@@ -100,25 +118,41 @@ void parse(Grid grid)
         }
         int i = 0;
         int j = 0;
+        cout << "rows:" << row << endl << "cols:" << col << endl;
         while (!reader.eof())
         {
             getline(reader, line);
-            if (line.length()==col)
+            cout << line.length() << endl;
+            cout << line << endl;
+            if (line.length()!=0)
             {
-                for (char c: line)
+                //cout << (line.length()==col) << endl;
+                if (line.length()==col)
                 {
-                    passedGrid[i][j++]=c;
+                    for (int f = 0; f < col; ++f)
+                    {
+                        passedGrid[i][f]=line[f];
+                    }
+                }
+                else
+                {
+                    cout << "error in length of input file, input grid not correct dimensions" << endl;
+                    parse(grid);
+                    return;
                 }
             }
-            else
-            {
-                cout << "error in length of input file, input grid not correct dimensions" << endl;
-                parse(grid);
-                return;
-            }
             ++i;
+            //cout << ++i << endl;
         }
-        grid = Grid(row, col, passedGrid);
+        for (int i = 0; i < row; ++i)
+        {
+            for (int j = 0; j < col; ++j)
+            {
+                cout << passedGrid[i][j];
+            }
+            cout << endl;
+        }
+        grid = new Grid(col, row, passedGrid, modeSetting());
         toUpperCase(grid);
         if (!checkCharacters(grid))
         {
@@ -152,7 +186,7 @@ void parse(Grid grid)
         }
         catch (const invalid_argument& ia)//got from c++.com
         {
-            cout << "bad input in row integer" << endl;
+            cout << "bad input in dimension integer" << endl;
             parse(grid);
             return;
         }
@@ -162,8 +196,9 @@ void parse(Grid grid)
             parse(grid);
             return;
         }
-        cout << "entering grid construction" << endl;
-        grid = Grid(row, col, density);
+        //cout << "entering grid construction" << endl;
+        grid = new Grid(row, col, density, modeSetting());
+        //cout << "why cant i get here?" << endl;
     }
 
 
@@ -172,26 +207,28 @@ void parse(Grid grid)
 
 int main(int argc, char **argv)
 {
-  Grid grid;
+  Grid *grid;
   parse(grid);
   char pauseStatus =  userPauseSetting();
-  while (!grid.isEmpty()&&!grid.isConstant())
+  //cout << m << endl;
+  grid->populateNextGen();
+  while (!grid->isEmpty() && !grid->isConstant())
   {
       if (pauseStatus=='u')
       {
-          grid.printGrid();
+          grid->printGrid();
       }
       else if (pauseStatus=='w')
       {
-          grid.printGrid();
+          grid->printGrid();
           system("pause");
       }
       else if (pauseStatus=='p')
       {
-          grid.printGrid();
+          grid->printGrid();
           std::this_thread::sleep_for(std::chrono::milliseconds(1000));
       }
-      grid.populateNextGen();
+      grid->populateNextGen();
   }
   return 0;
 }
