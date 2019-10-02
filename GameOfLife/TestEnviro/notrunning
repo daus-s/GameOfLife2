@@ -1,0 +1,25 @@
+//lol just to write methods and not be unable to read
+static bool checkCharacters()
+{
+    for (int i = 0; i < original->size();++i)
+    {
+        for (int j = 0; j < original[i]->size()); ++j)
+        {
+            if (original[i][j] !='x' || original[i][j] != '-')
+                return false;
+        }
+    }
+    return true;
+}
+
+static char** lowerLetterCase(char** original)
+{
+    for (int i = 0; i < original->size();++i)
+    {
+        for (int j = 0; j < original[i]->size()); ++j)
+        {
+            if (original[i][j] == 'X')
+                original[i][j] = 'x';
+        }
+    }
+}
