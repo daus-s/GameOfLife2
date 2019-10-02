@@ -29,9 +29,14 @@ Grid::Grid(int x, int y, float density, int m)
     //cout << "entering randomGrid()" << endl;
     randomGrid(y, x, density);
     //cout << "do i make it here?" << endl;
-    //return;
-    cout << mode << endl;
+    cout << "constructor complete" << endl;
+    printGrid();
 
+    nextGen = new char*[y];
+    for (size_t t = 0; t < y; t++)
+    {
+        nextGen[t] = new char[x];
+    }
 }
 //default to 2 for x,y
 Grid::Grid()
@@ -64,9 +69,13 @@ Grid::Grid(int x, int y, char** grid, int m)
             myGrid[i][j]=grid[i][j];
         }
     }
-    //printGrid();
-
     mode = m;
+
+    nextGen = new char*[y];
+    for (size_t t = 0; t < y; t++)
+    {
+        nextGen[t] = new char[x];
+    }
 }
 Grid::~Grid()
 {
@@ -136,6 +145,7 @@ void Grid::printGrid()
 
 int Grid::countNeighbors(int i, int j)
 {
+    //cout << "countNeighbors time" << endl;
     if (mode == 1)//classic
         return countNeighborsClassic(i, j);
     if (mode == 2)//mirror
@@ -149,6 +159,8 @@ int Grid::countNeighbors(int i, int j)
 
 int Grid::determineGrowth(int i, int j)
 {
+    //cout << "i: " << i << " j: " << j<< endl;
+    //cout << "determine growth:" << mode << "mode" << endl;
     int neighbors = countNeighbors(i, j);
     if (neighbors < 2) //die from lonliness
         return -1;
@@ -165,12 +177,11 @@ void Grid::populateNextGen()
 {
     //good hint in the assignemnt sheet, 'shadow paging'
     //cout << "locating segfault just inside populateNextGen" << endl;
-    printGrid();
     for (int i = 0; i < row; ++i)
     {
         for (int j = 0; j < col; ++j)
         {
-            cout << "locating segfault, outside of determineGrowth" << endl;
+            //cout << "locating segfault, outside of determineGrowth" << endl;
             int growth = determineGrowth(i,j);
             if(growth == -1)
                 nextGen[i][j]='-';//- is dead right?
@@ -190,12 +201,13 @@ void Grid::populateNextGen()
  */
 int Grid::countNeighborsClassic(int i, int j)
 {
+    cout << "we made it here?" << endl;
     int neighbors = 0;
     if ((i>0 && j>0) && myGrid[i-1][j-1]=='X')
     {
         neighbors++;
     }
-    if (j>0  && myGrid[i-1][j]=='X')
+    if (i>0  && myGrid[i-1][j]=='X')
     {
         neighbors++;
     }
@@ -215,7 +227,7 @@ int Grid::countNeighborsClassic(int i, int j)
     {
         neighbors++;
     }
-    if (i<row && myGrid[i+1][j]=='X')
+    if (i<row-1 && myGrid[i+1][j]=='X')
     {
         neighbors++;
     }
@@ -223,7 +235,7 @@ int Grid::countNeighborsClassic(int i, int j)
     {
         neighbors++;
     }
-
+    cout << neighbors << endl;
     return neighbors;
 
 }
@@ -299,7 +311,7 @@ int Grid::countNeighborsMirror(int i, int j)
     {
         neighbors++;
     }
-    if ((i=row && (j!=0 && j!=col)) && myGrid[i][j]=='X')
+    if ((i==row && (j!=0 && j!=col)) && myGrid[i][j]=='X')
     {
         neighbors++;
     }
@@ -328,9 +340,17 @@ int Grid::countNeighborsMirror(int i, int j)
     //row by row
     if (i>0)
     {
-        ul = myGrid[i-1][j-1];
-        um = myGrid[i-1][j];
-        ur = myGrid[i-1][j+1];
+        if (j>0)
+        {
+            ul = myGrid[i-1][j-1];
+        }
+
+            um = myGrid[i-1][j];
+
+        if (j<col-1)
+        {
+            ur = myGrid[i-1][j+1];
+        }
     }
     if (j>0)
     {
@@ -343,9 +363,15 @@ int Grid::countNeighborsMirror(int i, int j)
     }
     if (i<row-1)
     {
-        ll = myGrid[i+1][j-1];
-        lm = myGrid[i+1][j];
-        lr = myGrid[i+1][j+1];
+        if (j > 0)
+        {
+            ll = myGrid[i+1][j-1];
+        }
+            lm = myGrid[i+1][j];
+        if (j < col -1)
+        {
+            lr = myGrid[i+1][j+1];
+        }
     }
 
     if (ul == 'X')
