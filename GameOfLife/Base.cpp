@@ -1,57 +1,73 @@
 #include <iostream>
 #include "Grid.h"
+#include <cmath>
+#include <fstream>
+#include <string>
+#include <string.h>
+#include <stdio.h>
+#include <cstdio>
+#include <stdlib.h>
+#include <ctype.h>
+#include <time.h>
+#include <thread>
+
 
 
 using namespace std;
 
+char userPauseSetting()
+{
+    cout << "do you want a slight (p)ause between generations, (w)ait for it to provide user input or to run (u)nintrrupted?" << endl;
+    string c = "";
+    cin >> c;
+    if (c=="p"||c=="w"||c=="u")
+      return c[0];
+    else return userPauseSetting();
+
+}
 bool checkCharacters(Grid original)
 {
     for (int i = 0; i < original.row;++i)
     {
         for (int j = 0; j < original.col; ++j)
         {
-            if (original.myGrid[i][j] !='x' || original->myGrid[i][j] != '-')
+            if (original.myGrid[i][j] !='x' || original.myGrid[i][j] != '-')
                 return false;
         }
     }
     return true;
 }
 
-void lowerLetterCase(Grid original)
+void toUpperCase(Grid original)
 {
     for (int i = 0; i < original.row;++i)
     {
         for (int j = 0; j < original.col; ++j)
         {
-            if (original.myGrid[i][j] == 'X')
-                original.set(i, j, 'x');
+            if (original.myGrid[i][j] == 'x')
+                original.myGrid[i][j]='X';
         }
     }
 }
 
 
 
-int numberofCells(int row, int col, float density)
+
+void parse(Grid grid)
 {
-    return (int)((float)(row * col) * density);
-}
-
-
-
-void parse()
-{
-    Grid grid;
     cout << "do you wish to enter a map file? (y/n)" << endl;
     char mapFile = 'X';
     cin >> mapFile;
-    if (mapFile != 'Y' || mapFile != 'N' || mapFile != 'y' || mapFile != 'n')
+    string line = "";
+
+    if (mapFile != 'Y' && mapFile != 'N' && mapFile != 'y' && mapFile != 'n')
     {
         //this makes sure you enter correct values
         cout << "enter one of yYnN" << endl;
-        parse();
+        parse(grid);
         return;
     }
-    else if (mapFile != 'Y' || mapFile != 'y')
+    else if (mapFile == 'Y' || mapFile == 'y')
     {
         cout << "enter file (\"file\"+.txt)" << endl;
         string pathname = "";
@@ -66,7 +82,6 @@ void parse()
 
         try
         {
-            string line = "";
             getline(reader, line);
             row = stoi(line);
             getline(reader, line);
@@ -75,7 +90,7 @@ void parse()
         catch (const invalid_argument& ia)//got from c++.com
         {
             cout << "bad input in row and/or col values" << endl;
-            parse();
+            parse(grid);
             return;
         }
         passedGrid = new char*[row];
@@ -88,7 +103,7 @@ void parse()
         while (!reader.eof())
         {
             getline(reader, line);
-            if (strlen(line)==col)
+            if (line.length()==col)
             {
                 for (char c: line)
                 {
@@ -98,26 +113,30 @@ void parse()
             else
             {
                 cout << "error in length of input file, input grid not correct dimensions" << endl;
-                parse();
+                parse(grid);
                 return;
             }
             ++i;
         }
-        lowerLetterCase(passedGrid);
-        if (!checkCharacters(passedGrid))
+        grid = Grid(row, col, passedGrid);
+        toUpperCase(grid);
+        if (!checkCharacters(grid))
         {
             cout << "illegal charcter detected in input map" << endl;
-            parse();
+            parse(grid);
         }
-        grid = new Grid(row, col, passedGrid);
+
 
     }
     else
     {
         int row = 0;
         int col = 0;
+        float density = 0.0f;
         string stringCol;
         string stringRow;
+        string stringDensity;
+
         cout << "enter number of rows:" << endl;
         cin >> stringRow;
         cout << "enter number of cols:" << endl;
@@ -134,22 +153,45 @@ void parse()
         catch (const invalid_argument& ia)//got from c++.com
         {
             cout << "bad input in row integer" << endl;
-            parse();
+            parse(grid);
             return;
         }
         if (density > 1 || density < 0)
         {
             cout << "density is greater than 1 or less than 0, this is not possible" << endl;
-            parse();
+            parse(grid);
             return;
         }
-        grid = new Grid(row, col, density)
-
+        cout << "entering grid construction" << endl;
+        grid = Grid(row, col, density);
     }
+
+
+
 }
 
 int main(int argc, char **argv)
 {
-  parse();
+  Grid grid;
+  parse(grid);
+  char pauseStatus =  userPauseSetting();
+  while (!grid.isEmpty()&&!grid.isConstant())
+  {
+      if (pauseStatus=='u')
+      {
+          grid.printGrid();
+      }
+      else if (pauseStatus=='w')
+      {
+          grid.printGrid();
+          system("pause");
+      }
+      else if (pauseStatus=='p')
+      {
+          grid.printGrid();
+          std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      }
+      grid.populateNextGen();
+  }
   return 0;
 }

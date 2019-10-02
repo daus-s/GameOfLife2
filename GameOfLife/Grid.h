@@ -12,14 +12,16 @@ class Grid
 
         int mode;
 
+        float density;
+
         char** myGrid;
         char** nextGen;
 
         //count neighbor functions
-        int countNeighbors();
-        int countNeighborsClassic();
-        int countNeighborsMirror();
-        int countNeighborsDonut();
+        int countNeighbors(int i, int j);
+        int countNeighborsClassic(int i, int j);
+        int countNeighborsMirror(int i, int j);
+        int countNeighborsDonut(int i, int j);
 
         //utilities; like print set
         void printGrid();
@@ -29,10 +31,11 @@ class Grid
         int determineGrowth(int i, int j);
         void populateNextGen();
         void randomGrid(int i, int j, float density);
+        int numberofCells();
 
         //constructors & destructors
         Grid();
-        Grid(char** array);
+        Grid(int row, int col, char** array);
         Grid(int x, int y, float density);
         ~Grid();
 

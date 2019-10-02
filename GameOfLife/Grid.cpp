@@ -1,8 +1,6 @@
 #include <iostream>
 #include "Grid.h"
 
-using namespace "Grid.h"
-
 char** myGrid;
 char** nextGen;
 
@@ -11,18 +9,24 @@ int mode = 0;
 int row;
 int col;
 
+float density = 0.0f;
+
+//generates random grid based off parameters passed in by user
 Grid::Grid(int x, int y, float density)
 {
     col = x;
     row = y;
+    this->density = density;
+    cout << x << "," << y << "," << density << endl;
 
     char** myGrid = new char*[y];
     for (size_t t = 0; t < y; t++)
     {
         myGrid[t] = new char[x];
     }
-
-        randomGrid(y, x, density);
+    printGrid();
+    cout << "entering randomGrid()" << endl;
+    randomGrid(y, x, density);
 }
 //default to 2 for x,y
 Grid::Grid()
@@ -36,11 +40,11 @@ Grid::Grid()
         myGrid[t] = new char[2];
     }
 }
-
+//uses pointer for grid location
 Grid::Grid(int x, int y, char** grid)
 {
-    cols = x;
-    rows = y;
+    col = x;
+    row = y;
     myGrid = grid;
 }
 Grid::~Grid()
@@ -49,11 +53,13 @@ Grid::~Grid()
     delete nextGen;
 }
 
+
+
 void Grid::randomGrid(int row, int col, float density)
 {
 
-    int number = numberofCells(row, col, density);
-    cout << number << endl;
+    int number = (float)(row*col)*density;
+    //cout << number << endl;
     int dashes = (row * col) - number;
 
     for (size_t i = 0; i < row; ++i)
@@ -86,7 +92,9 @@ void Grid::randomGrid(int row, int col, float density)
                     number--;
                 }
             }
+            cout << myGrid[i][j];
         }
+        cout << endl;
     }
     //debug line
     //printGrid(row, col, randomGrid);
@@ -126,9 +134,9 @@ int Grid::determineGrowth(int i, int j)
         return -1;
     if (neighbors == 2)//stays constant
         return 0;
-    if (neighbors == 3)//grows one
+    if (neighbors == 3)//grow one
         return 1;
-    if (neigbors > 4) //dies from overpop
+    if (neighbors > 4) //dies from overpop
         return -1;
 }
 
@@ -139,7 +147,7 @@ void Grid::populateNextGen()
     {
         for (int j = 0; j < col; ++j)
         {
-            int growth = determineGrowth(i,j)
+            int growth = determineGrowth(i,j);
             if(growth == -1)
                 nextGen[i][j]='-';//- is dead right?
             else
@@ -159,35 +167,35 @@ void Grid::populateNextGen()
 int Grid::countNeighborsClassic(int i, int j)
 {
     int neighbors = 0;
-    if ((i>0 && j>0) && grid[i-1][j-1]=='X')
+    if ((i>0 && j>0) && myGrid[i-1][j-1]=='X')
     {
         neighbors++;
     }
-    if (j>0  && grid[i-1][j]=='X')
+    if (j>0  && myGrid[i-1][j]=='X')
     {
         neighbors++;
     }
-    if ((i>0 && j<grid[i-1]->size()-1) && grid[i-1][j+1]=='X')
+    if ((i>0 && j<col-1) && myGrid[i-1][j+1]=='X')
     {
         neighbors++;
     }
-    if (j>0 && grid[i][j-1]=='X')
+    if (j>0 && myGrid[i][j-1]=='X')
     {
         neighbors++;
     }
-    if (j<grid->size()-1 && grid[i][j+1]=='X')
+    if (j<col-1 && myGrid[i][j+1]=='X')
     {
         neighbors++;
     }
-    if ((i<grid->size()-1&&j>0) && grid[i+1][j-1]=='X')
+    if ((i<row-1&&j>0) && myGrid[i+1][j-1]=='X')
     {
         neighbors++;
     }
-    if (i>0 && grid[i+1][j]=='X')
+    if (i<row && myGrid[i+1][j]=='X')
     {
         neighbors++;
     }
-    if ((i<grid->size()-1&&j<grid[i]->size()-1) && grid[i+1][j+1]=='X')
+    if ((i<row-1&&j<col-1) && myGrid[i+1][j+1]=='X')
     {
         neighbors++;
     }
@@ -198,41 +206,39 @@ int Grid::countNeighborsClassic(int i, int j)
 
 int Grid::countNeighborsDonut(int i, int j)
 {
-    //i->rows
-    //j-cols
+    //i->row
+    //j-col
     //similar to time and momentum and space and energy so think that for project
-    int cols = myGrid[0]->size();
-    int rows = myGrid->size();
     int neighbors = 0;
-    if (grid[(i-1)%rows][(j-1)%cols]=='X')
+    if (myGrid[(i-1)%row][(j-1)%col]=='X')
     {
         neighbors++;
     }
-    if (grid[(i-1)%rows][j]=='X')
+    if (myGrid[(i-1)%row][j]=='X')
     {
         neighbors++;
     }
-    if (grid[(i-1)%rows][(j+1%cols)]=='X')
+    if (myGrid[(i-1)%row][(j+1%col)]=='X')
     {
         neighbors++;
     }
-    if (grid[i][(j-1)%cols]=='X')
+    if (myGrid[i][(j-1)%col]=='X')
     {
         neighbors++;
     }
-    if (grid[i][(j+1)%cols]=='X')
+    if (myGrid[i][(j+1)%col]=='X')
     {
         neighbors++;
     }
-    if (grid[(i+1)%rows][(j-1)%cols]=='X')
+    if (myGrid[(i+1)%row][(j-1)%col]=='X')
     {
         neighbors++;
     }
-    if (grid[(i+1)%rows][j]=='X')
+    if (myGrid[(i+1)%row][j]=='X')
     {
         neighbors++;
     }
-    if (grid[(i+1)%rows][(j+1)%cols]=='X')
+    if (myGrid[(i+1)%row][(j+1)%col]=='X')
     {
         neighbors++;
     }
@@ -251,7 +257,7 @@ int Grid::countNeighborsMirror(int i, int j)
     {
         neighbors += 3;
     }
-    if (i==0 && j==col) && myGrid[i][j]=='X')
+    if ((i==0 && j==col) && myGrid[i][j]=='X')
     {
         neighbors +=  3;
     }
@@ -259,7 +265,7 @@ int Grid::countNeighborsMirror(int i, int j)
     {
         neighbors += 3;
     }
-    if (i==row && j==0) && myGrid[i][j]=='X')
+    if ((i==row && j==0) && myGrid[i][j]=='X')
     {
         neighbors +=  3;
     }
@@ -269,15 +275,15 @@ int Grid::countNeighborsMirror(int i, int j)
     {
         neighbors++;
     }
-    if (i=row && (j!=0 && j!=col)) && myGrid[i][j]=='X')
+    if ((i=row && (j!=0 && j!=col)) && myGrid[i][j]=='X')
     {
         neighbors++;
     }
-    if ((i!=row&&i!=0) && j==col) && myGrid[i][j]=='X')
+    if (((i!=row&&i!=0) && j==col) && myGrid[i][j]=='X')
     {
         neighbors++;
     }
-    if ((i!=row&&i!=0) && j==0) && myGrid[i][j]=='X')
+    if (((i!=row&&i!=0) && j==0) && myGrid[i][j]=='X')
     {
         neighbors++;
     }
@@ -354,8 +360,8 @@ void set(int i, int j, char c)
 
 bool Grid::isEmpty()
 {
-    for (int i = 0; i < rows; ++i)
-        for (int j = 0; j < cols; ++j)
+    for (int i = 0; i < row; ++i)
+        for (int j = 0; j < col; ++j)
             if (myGrid[i][j]=='X')
                 return false;
     return true;
@@ -363,8 +369,8 @@ bool Grid::isEmpty()
 
 bool Grid::isConstant()
 {
-    for (int i = 0; i < rows; ++i)
-        for (int j = 0; j < cols; ++j)
+    for (int i = 0; i < row; ++i)
+        for (int j = 0; j < col; ++j)
             if (myGrid[i][j]!=nextGen[i][j])
                 return false;
     return true;
